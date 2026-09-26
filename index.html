@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}</style>
+</head>
+<body>
+<title>セインツ速報</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="セインツ速報">
+<meta name="theme-color" content="#0f0e0c">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+  :root{
+    color-scheme: dark;
+    --ground:#0f0e0c;
+    --surface:#1a1915;
+    --line:#2d2a23;
+    --ink:#f1ece0;
+    --muted:#958d7c;
+    --gold:#cdb37d;
+    --gold-deep:#8c7648;
+    --win:#6cb875;
+    --loss:#dd6a55;
+    --num:"Saira Condensed","Arial Narrow",system-ui,sans-serif;
+    --jp:"Zen Kaku Gothic New","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",system-ui,sans-serif;
+  }
+  html,body{background:var(--ground);color:var(--ink)}
+  body{font-family:var(--jp);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:560px;margin:0 auto;padding-inline:16px;padding-block:8px 40px;display:flex;flex-direction:column;gap:28px}
+
+  header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--ground);
+    display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:12px;border-bottom:1px solid var(--line)}
+  .brand{display:flex;flex-direction:column;line-height:1.1}
+  .brand small{font-family:var(--num);font-weight:700;letter-spacing:.22em;font-size:11px;color:var(--gold)}
+  .brand b{font-size:19px;font-weight:700;letter-spacing:.04em}
+  .record{font-family:var(--num);font-weight:800;font-size:28px;letter-spacing:.02em;font-variant-numeric:tabular-nums;text-align:right;line-height:1}
+  .record span{display:block;font-family:var(--jp);font-weight:500;font-size:11px;color:var(--muted);letter-spacing:.06em;margin-top:4px}
+
+  .label{font-size:12px;font-weight:700;letter-spacing:.14em;color:var(--gold)}
+
+  /* next game */
+  .next{background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--gold);border-radius:4px;padding:20px 18px;display:flex;flex-direction:column;gap:14px}
+  .next .meta{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+  .matchup{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .matchup .vs{font-family:var(--num);font-weight:700;font-size:20px;color:var(--gold)}
+  .matchup .opp{font-size:30px;font-weight:700;letter-spacing:.02em;text-wrap:balance;line-height:1.2}
+  .kick{font-size:15px}
+  .kick strong{font-weight:700}
+  .count{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;border-top:1px solid var(--line);padding-top:14px}
+  .count div{display:flex;flex-direction:column;align-items:flex-start}
+  .count b{font-family:var(--num);font-weight:800;font-size:44px;line-height:1;font-variant-numeric:tabular-nums}
+  .count span{font-size:11px;color:var(--muted);letter-spacing:.1em}
+  .live{font-family:var(--num);font-weight:800;font-size:34px;color:var(--loss);letter-spacing:.06em}
+
+  /* last result */
+  .last{display:flex;align-items:center;gap:14px}
+  .chip{flex:none;font-family:var(--num);font-weight:800;font-size:14px;width:30px;height:30px;display:grid;place-items:center;border-radius:3px;color:var(--ground)}
+  .chip.w{background:var(--win)} .chip.l{background:var(--loss)} .chip.t{background:var(--muted)}
+  .last .txt{display:flex;flex-direction:column;line-height:1.35}
+  .last .score{font-family:var(--num);font-weight:800;font-size:26px;font-variant-numeric:tabular-nums}
+  .last small{color:var(--muted);font-size:12px}
+
+  /* standings */
+  section{display:flex;flex-direction:column;gap:10px}
+  table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+  th{font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.1em;text-align:right;padding:0 0 6px}
+  th:first-child,td:first-child{text-align:left}
+  td{padding:10px 0;border-top:1px solid var(--line);text-align:right;font-family:var(--num);font-weight:700;font-size:18px}
+  td:first-child{font-family:var(--jp);font-weight:500;font-size:15px}
+  tr.me td{color:var(--gold)}
+  tr.me td:first-child{font-weight:700}
+  .rank{display:inline-block;width:18px;color:var(--muted);font-family:var(--num);font-weight:700}
+
+  /* schedule */
+  ol.sched{list-style:none;margin:0;padding:0}
+  ol.sched li{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:10px;padding:11px 0;border-top:1px solid var(--line)}
+  .wk{font-family:var(--num);font-weight:700;font-size:13px;color:var(--muted);letter-spacing:.04em}
+  .who{display:flex;flex-direction:column;line-height:1.3;min-width:0}
+  .who b{font-weight:500;font-size:15px}
+  .who b i{font-style:normal;font-family:var(--num);font-weight:700;color:var(--gold);margin-right:6px}
+  .who small{font-size:12px;color:var(--muted)}
+  .res{display:flex;align-items:center;gap:8px;font-family:var(--num);font-weight:700;font-size:17px;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .res .chip{width:24px;height:24px;font-size:12px}
+  .res.up{font-family:var(--jp);font-weight:500;font-size:13px;color:var(--ink)}
+  li.bye .who b{color:var(--muted)}
+  li.next-row{background:linear-gradient(90deg,rgba(205,179,125,.12),transparent 70%)}
+  li.next-row .wk{color:var(--gold)}
+  .intl{font-size:10px;border:1px solid var(--gold-deep);color:var(--gold);padding:0 5px;border-radius:2px;margin-left:6px;vertical-align:2px}
+
+  footer{font-size:12px;color:var(--muted);line-height:1.7;border-top:1px solid var(--line);padding-top:14px}
+  footer button{font:inherit;color:var(--gold);background:none;border:1px solid var(--gold-deep);border-radius:3px;padding:4px 10px;cursor:pointer;margin-top:8px}
+  footer button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="brand"><small>NEW ORLEANS</small><b>セインツ速報</b></div>
+    <div class="record" id="record">–<span>2026 レギュラーシーズン</span></div>
+  </header>
+
+  <div class="next" id="next"></div>
+
+  <section id="lastSec">
+    <div class="label">直近の試合</div>
+    <div class="last" id="last"></div>
+  </section>
+
+  <section>
+    <div class="label">NFC南地区</div>
+    <table>
+      <thead><tr><th>チーム</th><th>勝</th><th>敗</th><th>分</th><th>勝率</th></tr></thead>
+      <tbody id="standings"></tbody>
+    </table>
+  </section>
+
+  <section>
+    <div class="label">2026 日程（日本時間）</div>
+    <ol class="sched" id="sched"></ol>
+  </section>
+
+  <footer>
+    <div id="source"></div>
+    <button type="button" id="reload">最新データを取得</button>
+  </footer>
+</div>
+
+<script>
+// ---- 9/26時点のデータ（ライブ取得できない時の予備） ----
+const SNAPSHOT = {
+  asOf: "2026-09-26",
+  games: [
+    {w:1,  date:"2026-09-13T17:00Z", opp:"DET", home:false, us:30, them:31, done:true, note:"延長"},
+    {w:2,  date:"2026-09-20T17:00Z", opp:"BAL", home:false, us:24, them:17, done:true},
+    {w:3,  date:"2026-09-27T20:25Z", opp:"LV",  home:true},
+    {w:4,  date:"2026-10-06T00:15Z", opp:"ATL", home:true},
+    {w:5,  date:"2026-10-11T17:00Z", opp:"MIN", home:true},
+    {w:6,  date:"2026-10-18T17:00Z", opp:"NYG", home:false},
+    {w:7,  date:"2026-10-25T13:30Z", opp:"PIT", home:true, city:"パリ", intl:true},
+    {w:9,  date:"2026-11-08T18:00Z", opp:"CLE", home:true},
+    {w:10, date:"2026-11-15T18:00Z", opp:"CAR", home:true},
+    {w:11, date:"2026-11-22T18:00Z", opp:"CHI", home:false},
+    {w:12, date:"2026-11-29T18:00Z", opp:"CIN", home:false},
+    {w:13, date:"2026-12-06T18:00Z", opp:"GB",  home:false},
+    {w:14, date:"2026-12-13T18:00Z", opp:"CAR", home:false},
+    {w:15, date:"2026-12-20T18:00Z", opp:"TB",  home:false},
+    {w:16, date:"2026-12-27T18:00Z", opp:"ARI", home:true},
+    {w:17, date:"2027-01-03T18:00Z", opp:"ATL", home:false},
+    {w:18, date:null,                opp:"TB",  home:true, tbd:true}
+  ],
+  standings: [
+    {t:"NO", w:1, l:1, tie:0},
+    {t:"CAR",w:1, l:1, tie:0},
+    {t:"ATL",w:0, l:2, tie:0},
+    {t:"TB", w:0, l:2, tie:0}
+  ]
+};
+
+const JP = {ARI:"カーディナルス",ATL:"ファルコンズ",BAL:"レイブンズ",BUF:"ビルズ",CAR:"パンサーズ",CHI:"ベアーズ",CIN:"ベンガルズ",CLE:"ブラウンズ",DAL:"カウボーイズ",DEN:"ブロンコス",DET:"ライオンズ",GB:"パッカーズ",HOU:"テキサンズ",IND:"コルツ",JAX:"ジャガーズ",KC:"チーフス",LAC:"チャージャーズ",LAR:"ラムズ",LV:"レイダース",MIA:"ドルフィンズ",MIN:"バイキングス",NE:"ペイトリオッツ",NO:"セインツ",NYG:"ジャイアンツ",NYJ:"ジェッツ",PHI:"イーグルス",PIT:"スティーラーズ",SEA:"シーホークス",SF:"49ers",TB:"バッカニアーズ",TEN:"タイタンズ",WSH:"コマンダース"};
+const CITY = {ARI:"グレンデール",ATL:"アトランタ",BAL:"ボルチモア",BUF:"バッファロー",CAR:"シャーロット",CHI:"シカゴ",CIN:"シンシナティ",CLE:"クリーブランド",DAL:"アーリントン",DEN:"デンバー",DET:"デトロイト",GB:"グリーンベイ",HOU:"ヒューストン",IND:"インディアナポリス",JAX:"ジャクソンビル",KC:"カンザスシティ",LAC:"ロサンゼルス",LAR:"ロサンゼルス",LV:"ラスベガス",MIA:"マイアミ",MIN:"ミネアポリス",NE:"フォックスボロ",NYG:"ニュージャージー",NYJ:"ニュージャージー",PHI:"フィラデルフィア",PIT:"ピッツバーグ",SEA:"シアトル",SF:"サンタクララ",TB:"タンパ",TEN:"ナッシュビル",WSH:"ランドーバー"};
+const name = a => JP[a] || a;
+const place = g => g.city ? g.city : (g.home ? "スーパードーム" : (CITY[g.opp] || ""));
+
+const ESPN = "https://site.api.espn.com/apis";
+let state = {games: SNAPSHOT.games, standings: SNAPSHOT.standings, live:false, fetchedAt:null};
+
+// ---- 日本時間フォーマット ----
+const fmt = new Intl.DateTimeFormat("ja-JP",{timeZone:"Asia/Tokyo",month:"numeric",day:"numeric",weekday:"short",hour:"2-digit",minute:"2-digit",hour12:false});
+function jst(iso){
+  const p = Object.fromEntries(fmt.formatToParts(new Date(iso)).map(x=>[x.type,x.value]));
+  return {md:`${p.month}/${p.day}`, wd:p.weekday, hm:`${p.hour}:${p.minute}`, full:`${p.month}月${p.day}日(${p.weekday}) ${p.hour}:${p.minute}`};
+}
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const resultOf = g => g.us>g.them ? "w" : g.us<g.them ? "l" : "t";
+const RES_JP = {w:"勝",l:"敗",t:"分"};
+
+// ---- ライブ取得（ホスティング時に動く。失敗したら予備データ） ----
+async function getJSON(url){
+  const r = await fetch(url,{cache:"no-store"});
+  if(!r.ok) throw new Error(r.status);
+  return r.json();
+}
+function num(s){ if(s==null) return null; if(typeof s==="object") s = s.value ?? s.displayValue; const n = parseFloat(s); return isNaN(n)?null:n; }
+function parseSchedule(j){
+  return (j.events||[]).map(e=>{
+    const c = e.competitions[0];
+    const me = c.competitors.find(x=>x.team.abbreviation==="NO");
+    const op = c.competitors.find(x=>x!==me);
+    const st = (c.status||e.status||{}).type||{};
+    return {
+      w: e.week?.number, date: e.date, opp: op.team.abbreviation, home: me.homeAway==="home",
+      us: num(me.score), them: num(op.score), done: !!st.completed, inProgress: st.state==="in",
+      tbd: c.timeValid===false, city: (c.venue?.address?.country && c.venue.address.country!=="USA") ? (c.venue.address.city||"") : null,
+      intl: !!(c.venue?.address?.country && c.venue.address.country!=="USA")
+    };
+  }).filter(g=>g.w);
+}
+function parseStandings(j){
+  const want = new Set(["NO","ATL","CAR","TB"]), out = {};
+  (function walk(o){
+    if(!o || typeof o!=="object") return;
+    if(Array.isArray(o)) return o.forEach(walk);
+    if(o.team && o.stats && want.has(o.team.abbreviation)){
+      const s = n => (o.stats.find(x=>x.name===n)||{}).value || 0;
+      out[o.team.abbreviation] = {t:o.team.abbreviation, w:s("wins"), l:s("losses"), tie:s("ties")};
+    }
+    Object.values(o).forEach(walk);
+  })(j);
+  const arr = Object.values(out);
+  return arr.length===4 ? arr : null;
+}
+async function refresh(){
+  try{
+    const [sch, std] = await Promise.all([
+      getJSON(`${ESPN}/site/v2/sports/football/nfl/teams/no/schedule?seasontype=2`),
+      getJSON(`${ESPN}/v2/sports/football/nfl/standings?seasontype=2`).catch(()=>null)
+    ]);
+    const games = parseSchedule(sch);
+    if(games.length){ state.games = games; state.live = true; state.fetchedAt = new Date(); }
+    const st = std && parseStandings(std);
+    if(st) state.standings = st;
+  }catch(e){ /* オフライン等：予備データのまま */ }
+  render();
+}
+
+// ---- 描画 ----
+function nextGame(now){
+  return state.games.find(g=>g.inProgress) ||
+         state.games.find(g=>!g.done && g.date && new Date(g.date).getTime()+4*3600e3 > now);
+}
+function renderRecord(){
+  const d = state.games.filter(g=>g.done);
+  const w = d.filter(g=>resultOf(g)==="w").length, l = d.filter(g=>resultOf(g)==="l").length, t = d.filter(g=>resultOf(g)==="t").length;
+  document.getElementById("record").innerHTML = `${w}-${l}${t?"-"+t:""}<span>${w}勝${l}敗${t?t+"分":""}</span>`;
+}
+function renderNext(){
+  const now = Date.now(), g = nextGame(now), el = document.getElementById("next");
+  if(!g){ el.innerHTML = `<div class="label">次の試合</div><div class="kick">レギュラーシーズンの日程は終了しました。</div>`; return; }
+  const k = jst(g.date), start = new Date(g.date).getTime();
+  const tag = g.intl ? `国際試合・${esc(place(g))}` : (g.home ? "ホーム" : "アウェイ");
+  let clock;
+  if(g.inProgress || (now>=start && !g.done)){
+    clock = `<div class="live">試合中 ${g.us!=null?`${g.us} – ${g.them}`:""}</div>`;
+  }else{
+    let s = Math.max(0, Math.floor((start-now)/1000));
+    const d = Math.floor(s/86400); s%=86400; const h = Math.floor(s/3600); s%=3600; const m = Math.floor(s/60); s%=60;
+    const pad = n => String(n).padStart(2,"0");
+    clock = `<div class="count"><div><b>${d}</b><span>日</span></div><div><b>${pad(h)}</b><span>時間</span></div><div><b>${pad(m)}</b><span>分</span></div><div><b>${pad(s)}</b><span>秒</span></div></div>`;
+  }
+  el.innerHTML = `
+    <div class="meta"><span class="label">次の試合 · 第${g.w}週</span><span>${tag}</span></div>
+    <div class="matchup"><span class="vs">${g.home?"VS":"@"}</span><span class="opp">${esc(name(g.opp))}</span></div>
+    <div class="kick"><strong>${g.tbd ? "日時未定" : k.full}</strong>${g.tbd?"":" キックオフ"}<br><span style="color:var(--muted);font-size:13px">${esc(place(g))}</span></div>
+    ${g.tbd ? "" : clock}`;
+}
+function renderLast(){
+  const d = state.games.filter(g=>g.done), g = d[d.length-1], sec = document.getElementById("lastSec");
+  if(!g){ sec.hidden = true; return; }
+  sec.hidden = false;
+  const r = resultOf(g);
+  document.getElementById("last").innerHTML = `
+    <span class="chip ${r}">${RES_JP[r]}</span>
+    <div class="txt"><span class="score">${g.us} – ${g.them}</span>
+    <small>第${g.w}週 ${g.home?"vs":"@"} ${esc(name(g.opp))} · ${jst(g.date).md}(${jst(g.date).wd})${g.note?" · "+g.note:""}</small></div>`;
+}
+function renderStandings(){
+  const pct = s => { const gp = s.w+s.l+s.tie; return gp ? ((s.w+s.tie/2)/gp) : 0; };
+  const rows = [...state.standings].sort((a,b)=>pct(b)-pct(a) || b.w-a.w);
+  document.getElementById("standings").innerHTML = rows.map((s,i)=>`
+    <tr class="${s.t==="NO"?"me":""}"><td><span class="rank">${i+1}</span>${esc(name(s.t))}</td>
+    <td>${s.w}</td><td>${s.l}</td><td>${s.tie}</td><td>${pct(s).toFixed(3).replace(/^0/,"")}</td></tr>`).join("");
+}
+function renderSchedule(){
+  const now = Date.now(), nx = nextGame(now), byW = new Map(state.games.map(g=>[g.w,g]));
+  const maxW = Math.max(18, ...state.games.map(g=>g.w));
+  let html = "";
+  for(let w=1; w<=maxW; w++){
+    const g = byW.get(w);
+    if(!g){ html += `<li class="bye"><span class="wk">W${w}</span><div class="who"><b>BYE（試合なし）</b></div><span></span></li>`; continue; }
+    const k = g.date ? jst(g.date) : null;
+    let res;
+    if(g.done){ const r = resultOf(g); res = `<span class="res"><span class="chip ${r}">${RES_JP[r]}</span>${g.us}–${g.them}</span>`; }
+    else res = `<span class="res up">${g.tbd||!k ? "未定" : k.hm}</span>`;
+    const when = k ? `${k.md}(${k.wd})` : "日程未定";
+    html += `<li class="${nx&&nx.w===g.w?"next-row":""}"><span class="wk">W${w}</span>
+      <div class="who"><b><i>${g.home?"vs":"@"}</i>${esc(name(g.opp))}${g.intl?'<span class="intl">国際</span>':""}</b>
+      <small>${when} · ${esc(place(g))}</small></div>${res}</li>`;
+  }
+  document.getElementById("sched").innerHTML = html;
+}
+function renderSource(){
+  document.getElementById("source").textContent = state.live
+    ? `データ：ESPN（${jst(state.fetchedAt.toISOString()).full} 取得）`
+    : `データ：${SNAPSHOT.asOf.replace(/-/g,"/")} 時点の保存データ。ホスティングするとESPNから自動で最新化されます。`;
+}
+function render(){ renderRecord(); renderNext(); renderLast(); renderStandings(); renderSchedule(); renderSource(); }
+
+render();
+refresh();
+setInterval(renderNext, 1000);
+setInterval(refresh, 5*60*1000);
+document.getElementById("reload").addEventListener("click", refresh);
+
+if("serviceWorker" in navigator && location.protocol==="https:"){
+  navigator.serviceWorker.register("sw.js").catch(()=>{});
+}
+</script>
+
+</body>
+</html>

@@ -33,7 +33,7 @@
   }
   html,body{background:var(--ground);color:var(--ink)}
   body{font-family:var(--jp);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
-  .wrap{max-width:560px;margin:0 auto;padding-inline:16px;padding-block:8px 40px;display:flex;flex-direction:column;gap:28px}
+  .wrap{max-width:560px;margin:0 auto;padding-inline:16px;padding-block:8px 100px;display:flex;flex-direction:column;gap:28px}
 
   header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--ground);
     display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:12px;border-bottom:1px solid var(--line)}
@@ -44,6 +44,8 @@
   .record span{display:block;font-family:var(--jp);font-weight:500;font-size:11px;color:var(--muted);letter-spacing:.06em;margin-top:4px}
 
   .label{font-size:12px;font-weight:700;letter-spacing:.14em;color:var(--gold)}
+
+  .tab-panel{display:flex;flex-direction:column;gap:28px}
 
   /* next game */
   .next{background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--gold);border-radius:4px;padding:20px 18px;display:flex;flex-direction:column;gap:14px}
@@ -94,9 +96,41 @@
   li.next-row .wk{color:var(--gold)}
   .intl{font-size:10px;border:1px solid var(--gold-deep);color:var(--gold);padding:0 5px;border-radius:2px;margin-left:6px;vertical-align:2px}
 
+  /* news */
+  .news-list{display:flex;flex-direction:column;gap:12px}
+  .news-card{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:16px;display:flex;flex-direction:column;gap:8px}
+  .news-card .nhead{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .news-card .ndate{font-family:var(--num);font-size:12px;color:var(--muted);letter-spacing:.04em}
+  .news-tag{font-size:10px;font-weight:700;color:var(--gold);border:1px solid var(--gold-deep);padding:1px 6px;border-radius:2px;letter-spacing:.04em;white-space:nowrap}
+  .news-card h3{font-size:16px;font-weight:700;line-height:1.45;margin:0;text-wrap:balance}
+  .news-card p{font-size:13.5px;line-height:1.75;margin:0;color:var(--ink);opacity:.9}
+  .news-card .nsrc{font-size:11px;color:var(--muted)}
+
+  /* roster */
+  .roster-group{display:flex;flex-direction:column;gap:2px}
+  ul.roster{list-style:none;margin:0;padding:0}
+  ul.roster li{display:grid;grid-template-columns:38px 1fr;gap:12px;align-items:flex-start;padding:12px 0;border-top:1px solid var(--line)}
+  .num-badge{font-family:var(--num);font-weight:800;font-size:15px;color:var(--gold);border:1px solid var(--gold-deep);border-radius:3px;height:32px;display:flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+  .pl{display:flex;flex-direction:column;gap:4px;min-width:0}
+  .pl .pname{font-weight:700;font-size:15.5px;display:flex;align-items:baseline;gap:7px;flex-wrap:wrap}
+  .pl .ppos{font-family:var(--num);font-weight:700;font-size:10px;color:var(--muted);letter-spacing:.05em;border:1px solid var(--line);padding:1px 5px;border-radius:2px}
+  .pl .pmeta{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .pl .pblurb{font-size:12.5px;line-height:1.6;color:var(--ink);opacity:.85}
+
+  .note{font-size:12px;color:var(--muted);line-height:1.7;border-top:1px solid var(--line);padding-top:14px}
+
   footer{font-size:12px;color:var(--muted);line-height:1.7;border-top:1px solid var(--line);padding-top:14px}
   footer button{font:inherit;color:var(--gold);background:none;border:1px solid var(--gold-deep);border-radius:3px;padding:4px 10px;cursor:pointer;margin-top:8px}
   footer button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+  /* tab bar */
+  .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:6;display:flex;background:var(--surface);
+    border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px))}
+  .tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;
+    color:var(--muted);font:inherit;font-size:11px;letter-spacing:.02em;padding:6px 4px;cursor:pointer;border-radius:6px}
+  .tabbar button.active{color:var(--gold)}
+  .tabbar button:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
+  .tabbar svg{width:20px;height:20px}
 </style>
 
 <div class="wrap">
@@ -105,31 +139,61 @@
     <div class="record" id="record">–<span>2026 レギュラーシーズン</span></div>
   </header>
 
-  <div class="next" id="next"></div>
+  <div class="tab-panel" id="tab-home">
+    <div class="next" id="next"></div>
 
-  <section id="lastSec">
-    <div class="label">直近の試合</div>
-    <div class="last" id="last"></div>
-  </section>
+    <section id="lastSec">
+      <div class="label">直近の試合</div>
+      <div class="last" id="last"></div>
+    </section>
 
-  <section>
-    <div class="label">NFC南地区</div>
-    <table>
-      <thead><tr><th>チーム</th><th>勝</th><th>敗</th><th>分</th><th>勝率</th></tr></thead>
-      <tbody id="standings"></tbody>
-    </table>
-  </section>
+    <section>
+      <div class="label">NFC南地区</div>
+      <table>
+        <thead><tr><th>チーム</th><th>勝</th><th>敗</th><th>分</th><th>勝率</th></tr></thead>
+        <tbody id="standings"></tbody>
+      </table>
+    </section>
 
-  <section>
-    <div class="label">2026 日程（日本時間）</div>
-    <ol class="sched" id="sched"></ol>
-  </section>
+    <section>
+      <div class="label">2026 日程（日本時間）</div>
+      <ol class="sched" id="sched"></ol>
+    </section>
 
-  <footer>
-    <div id="source"></div>
-    <button type="button" id="reload">最新データを取得</button>
-  </footer>
+    <footer>
+      <div id="source"></div>
+      <button type="button" id="reload">最新データを取得</button>
+    </footer>
+  </div>
+
+  <div class="tab-panel" id="tab-news" hidden>
+    <section>
+      <div class="label">最新ニュース</div>
+      <div class="news-list" id="newsList"></div>
+    </section>
+    <div class="note" id="newsNote"></div>
+  </div>
+
+  <div class="tab-panel" id="tab-roster" hidden>
+    <section id="rosterSec"></section>
+    <div class="note" id="rosterNote"></div>
+  </div>
 </div>
+
+<nav class="tabbar" id="tabbar">
+  <button type="button" data-tab="home" class="active">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M8 6v12M16 6v12"/></svg>
+    試合
+  </button>
+  <button type="button" data-tab="news">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="16" rx="1"/><path d="M7 8h6M7 12h6M7 16h3"/><path d="M17 8h2a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9"/></svg>
+    ニュース
+  </button>
+  <button type="button" data-tab="roster">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M4 20c0-3 2.5-5 5-5s5 2 5 5"/><circle cx="17" cy="9" r="2.2"/><path d="M15 20c0-2.2 1-4 3-4.6"/></svg>
+    選手名鑑
+  </button>
+</nav>
 
 <script>
 // ---- 9/26時点のデータ（ライブ取得できない時の予備） ----
@@ -162,6 +226,61 @@ const SNAPSHOT = {
   ]
 };
 
+// ---- ニュース（9/26時点、英語記事を日本語で要約） ----
+const NEWS = [
+  {date:"2026-09-25", tag:"負傷情報", title:"WRバリオン・ブラウン、ハムストリング負傷で日曜欠場へ",
+    body:"主力のキックリターナーを務めるバリオン・ブラウンが、ハムストリングの負傷により日曜日のレイダース戦を欠場する見込み。", src:"ESPN"},
+  {date:"2026-09-24", tag:"プレビュー", title:"ホーム開幕はレイダース戦、負傷者情報とロースター動向",
+    body:"水曜の負傷者リストには8選手の名前が上がった。チームはロングスナッパーのカル・アドミティスと契約し、OTケルビン・バンクスJr.を負傷者リスト(IR)に登録。第3週、本拠地スーパードームでの一戦に備える。", src:"公式サイト"},
+  {date:"2026-09-24", tag:"注目カード", title:"新世代のOC対決 ― クビアックとムーアが導くレイダース戦",
+    body:"ともにオフェンスコーディネーターとしてスーパーボウル制覇を経験したクリント・クビアック（レイダース）とケレン・ムーア（セインツ）の対決に注目が集まる。", src:"ESPN"},
+  {date:"2026-09-23", tag:"ロースター", title:"今週もロングスナッパー起用へ、ポジション争い続く",
+    body:"ケイトリン・テレル記者によると、セインツは第3週に向けてもロングスナッパーのポジション争いを続けている。", src:"ESPN"},
+  {date:"2026-09-22", tag:"試合結果", title:"レイブンズ戦、劇的な逆転で今季初勝利",
+    body:"第4Qを17-9のビハインドで迎えながら終盤15得点を挙げ、24-17で逆転勝利。第3QにOTケルビン・バンクスJr.が右足首を負傷する中、控えのエイシム・リチャーズが好プレーで穴を埋めた。ケレン・ムーアHCは「フラストレーションを溜めるのではなく、解決策を探す集団だ」と選手たちの姿勢を称えた。", src:"公式サイト"}
+];
+
+// ---- 選手名鑑（9/26時点ロースターより抜粋） ----
+const ROSTER = [
+  {group:"QB", label:"クォーターバック", players:[
+    {no:6, name:"タイラー・シャフ", pos:"QB", size:"196cm / 99kg", age:26, col:"ルイビル大", blurb:"今シーズン、先発QBを務める。"}
+  ]},
+  {group:"RB", label:"ランニングバック", players:[
+    {no:41, name:"アルビン・カマラ", pos:"RB", size:"178cm / 98kg", age:31, col:"テネシー大", blurb:"2017年入団以来、チームを支え続ける看板ランニングバック。"},
+    {no:3, name:"トラビス・エティエンヌJr.", pos:"RB", size:"178cm / 98kg", age:27, col:"クレムソン大", blurb:"スピードを武器にするランニングバック。"}
+  ]},
+  {group:"WR", label:"ワイドレシーバー", players:[
+    {no:12, name:"クリス・オレーブ", pos:"WR", size:"183cm / 85kg", age:26, col:"オハイオ州立大", blurb:"2022年ドラフト1巡指名、攻撃の中心を担うレシーバー。"},
+    {no:14, name:"デヴォーン・ヴィーリー", pos:"WR", size:"196cm / 95kg", age:28, col:"ユタ大", blurb:"高身長を生かすワイドレシーバー。"}
+  ]},
+  {group:"TE", label:"タイトエンド", players:[
+    {no:83, name:"ジュワン・ジョンソン", pos:"TE", size:"193cm / 105kg", age:29, col:"オレゴン大", blurb:"長年チームを支えるタイトエンド。"}
+  ]},
+  {group:"OL", label:"オフェンスライン", players:[
+    {no:78, name:"エリック・マッコイ", pos:"C", size:"193cm / 137kg", age:28, col:"テキサスA&M大", blurb:"オフェンスラインの司令塔を務めるセンター。"},
+    {no:75, name:"タリース・フアガ", pos:"OT", size:"198cm / 147kg", age:24, col:"オレゴン州立大", blurb:"若手の右タックル。"}
+  ]},
+  {group:"DL", label:"ディフェンスライン", players:[
+    {no:94, name:"キャメロン・ジョーダン", pos:"DE", size:"193cm / 130kg", age:36, col:"カリフォルニア大", blurb:"2011年入団、殿堂入りも期待されるベテランパスラッシャー。"},
+    {no:99, name:"チェイス・ヤング", pos:"DE", size:"196cm / 120kg", age:27, col:"オハイオ州立大", blurb:"2020年ドラフト全体2位指名の実績を持つエッジラッシャー。"},
+    {no:90, name:"ブライアン・ブリージー", pos:"DT", size:"196cm / 138kg", age:24, col:"クレムソン大", blurb:"守備ラインの若手有望株。"},
+    {no:92, name:"デイヴォン・ゴドショー", pos:"DT", size:"191cm / 150kg", age:31, col:"LSU", blurb:"ラインの中央を固める経験豊富なベテラン。"}
+  ]},
+  {group:"LB", label:"ラインバッカー", players:[
+    {no:20, name:"ピート・ワーナー", pos:"LB", size:"191cm / 110kg", age:27, col:"オハイオ州立大", blurb:"2021年ドラフトで加入したラインバッカー。"},
+    {no:55, name:"ケイデン・エリス", pos:"LB", size:"188cm / 108kg", age:31, col:"アイダホ大", blurb:"チームを鼓舞するベテランラインバッカー。"}
+  ]},
+  {group:"DB", label:"ディフェンスバック", players:[
+    {no:1, name:"クールエイド・マッキンストリー", pos:"CB", size:"180cm / 90kg", age:23, col:"アラバマ大", blurb:"2024年ドラフト2巡指名の若手コーナーバック。"},
+    {no:21, name:"ジャスティン・リード", pos:"S", size:"185cm / 94kg", age:29, col:"スタンフォード大", blurb:"経験豊富なベテランセーフティ。"},
+    {no:23, name:"ジュリアン・ブラックモン", pos:"S", size:"183cm / 92kg", age:27, col:"ユタ大", blurb:"攻守にバランスの取れたセーフティ。"}
+  ]},
+  {group:"ST", label:"スペシャルチームズ", players:[
+    {no:39, name:"チャーリー・スミス", pos:"K", size:"193cm / 95kg", age:25, col:"—", blurb:"プレースキッカー。"},
+    {no:17, name:"ライアン・ライト", pos:"P", size:"191cm / 111kg", age:26, col:"テュレーン大", blurb:"パンター。"}
+  ]}
+];
+
 const JP = {ARI:"カーディナルス",ATL:"ファルコンズ",BAL:"レイブンズ",BUF:"ビルズ",CAR:"パンサーズ",CHI:"ベアーズ",CIN:"ベンガルズ",CLE:"ブラウンズ",DAL:"カウボーイズ",DEN:"ブロンコス",DET:"ライオンズ",GB:"パッカーズ",HOU:"テキサンズ",IND:"コルツ",JAX:"ジャガーズ",KC:"チーフス",LAC:"チャージャーズ",LAR:"ラムズ",LV:"レイダース",MIA:"ドルフィンズ",MIN:"バイキングス",NE:"ペイトリオッツ",NO:"セインツ",NYG:"ジャイアンツ",NYJ:"ジェッツ",PHI:"イーグルス",PIT:"スティーラーズ",SEA:"シーホークス",SF:"49ers",TB:"バッカニアーズ",TEN:"タイタンズ",WSH:"コマンダース"};
 const CITY = {ARI:"グレンデール",ATL:"アトランタ",BAL:"ボルチモア",BUF:"バッファロー",CAR:"シャーロット",CHI:"シカゴ",CIN:"シンシナティ",CLE:"クリーブランド",DAL:"アーリントン",DEN:"デンバー",DET:"デトロイト",GB:"グリーンベイ",HOU:"ヒューストン",IND:"インディアナポリス",JAX:"ジャクソンビル",KC:"カンザスシティ",LAC:"ロサンゼルス",LAR:"ロサンゼルス",LV:"ラスベガス",MIA:"マイアミ",MIN:"ミネアポリス",NE:"フォックスボロ",NYG:"ニュージャージー",NYJ:"ニュージャージー",PHI:"フィラデルフィア",PIT:"ピッツバーグ",SEA:"シアトル",SF:"サンタクララ",TB:"タンパ",TEN:"ナッシュビル",WSH:"ランドーバー"};
 const name = a => JP[a] || a;
@@ -176,6 +295,7 @@ function jst(iso){
   const p = Object.fromEntries(fmt.formatToParts(new Date(iso)).map(x=>[x.type,x.value]));
   return {md:`${p.month}/${p.day}`, wd:p.weekday, hm:`${p.hour}:${p.minute}`, full:`${p.month}月${p.day}日(${p.weekday}) ${p.hour}:${p.minute}`};
 }
+function ymd(s){ const [y,m,d] = s.split("-").map(Number); return `${m}月${d}日`; }
 const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const resultOf = g => g.us>g.them ? "w" : g.us<g.them ? "l" : "t";
 const RES_JP = {w:"勝",l:"敗",t:"分"};
@@ -229,7 +349,7 @@ async function refresh(){
   render();
 }
 
-// ---- 描画 ----
+// ---- 描画：ホーム ----
 function nextGame(now){
   return state.games.find(g=>g.inProgress) ||
          state.games.find(g=>!g.done && g.date && new Date(g.date).getTime()+4*3600e3 > now);
@@ -299,13 +419,65 @@ function renderSource(){
     ? `データ：ESPN（${jst(state.fetchedAt.toISOString()).full} 取得）`
     : `データ：${SNAPSHOT.asOf.replace(/-/g,"/")} 時点の保存データ。ホスティングするとESPNから自動で最新化されます。`;
 }
+
+// ---- 描画：ニュース ----
+function renderNews(){
+  document.getElementById("newsList").innerHTML = NEWS.map(n=>`
+    <article class="news-card">
+      <div class="nhead"><span class="ndate">${ymd(n.date)}</span><span class="news-tag">${esc(n.tag)}</span></div>
+      <h3>${esc(n.title)}</h3>
+      <p>${esc(n.body)}</p>
+      <div class="nsrc">情報源：${esc(n.src)}</div>
+    </article>`).join("");
+  document.getElementById("newsNote").textContent = `${ymd(SNAPSHOT.asOf)}時点の記事を日本語で要約したスナップショットです。最新情報は次回更新時に反映されます。`;
+}
+
+// ---- 描画：選手名鑑 ----
+function renderRoster(){
+  document.getElementById("rosterSec").innerHTML = ROSTER.map(g=>`
+    <div class="roster-group">
+      <div class="label">${esc(g.label)}</div>
+      <ul class="roster">
+        ${g.players.map(p=>`
+          <li>
+            <div class="num-badge">${p.no}</div>
+            <div class="pl">
+              <div class="pname">${esc(p.name)}<span class="ppos">${esc(p.pos)}</span></div>
+              <div class="pmeta">${esc(p.size)} · ${p.age}歳 · ${esc(p.col)}</div>
+              <div class="pblurb">${esc(p.blurb)}</div>
+            </div>
+          </li>`).join("")}
+      </ul>
+    </div>`).join("");
+  document.getElementById("rosterNote").textContent = `${ymd(SNAPSHOT.asOf)}時点のロースターより主力メンバーを抜粋。`;
+}
+
 function render(){ renderRecord(); renderNext(); renderLast(); renderStandings(); renderSchedule(); renderSource(); }
 
 render();
+renderNews();
+renderRoster();
 refresh();
 setInterval(renderNext, 1000);
 setInterval(refresh, 5*60*1000);
 document.getElementById("reload").addEventListener("click", refresh);
+
+// ---- タブ切り替え ----
+const TABS = ["home","news","roster"];
+function showTab(t){
+  TABS.forEach(k=>{
+    document.getElementById(`tab-${k}`).hidden = k!==t;
+  });
+  document.querySelectorAll("#tabbar button").forEach(b=>b.classList.toggle("active", b.dataset.tab===t));
+  try{ localStorage.setItem("saints-tab", t); }catch(e){}
+}
+document.getElementById("tabbar").addEventListener("click", e=>{
+  const b = e.target.closest("button[data-tab]");
+  if(b) showTab(b.dataset.tab);
+});
+let initialTab = "home";
+try{ const saved = localStorage.getItem("saints-tab"); if(TABS.includes(saved)) initialTab = saved; }catch(e){}
+showTab(initialTab);
 
 if("serviceWorker" in navigator && location.protocol==="https:"){
   navigator.serviceWorker.register("sw.js").catch(()=>{});
